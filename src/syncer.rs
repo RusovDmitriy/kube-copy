@@ -32,7 +32,6 @@ impl KubeSyncer {
 
         let client = Client::try_from(config).context("Failed to create kube client")?;
 
-        // 3. Повторно взять lock и вставить
         let mut clients = self.clients.lock().unwrap();
         clients.insert(kube_context.to_string(), client.clone());
 
