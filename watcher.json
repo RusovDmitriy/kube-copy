@@ -1,0 +1,14 @@
+[
+  {
+    "name": "example-watcher",
+    "kube_context": "minikube",
+    "namespace": "default",
+    "label_selectors": ["app=my-app"],
+    "paths": [
+      {
+        "src": "./my-app/dist",
+        "dest": "/my-app/dist"
+      }
+    ]
+  }
+]
