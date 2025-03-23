@@ -66,6 +66,7 @@ impl KubeSyncer {
         pod: &str,
         src: &str,
         dest: &str,
+        post_sync_command: &Option<String>,
     ) {
         let target = format!("{}/{}:{}", namespace, pod, dest);
         println!("📤 Syncing {} -> {} (ctx: {})", src, target, kube_context);
@@ -84,6 +85,40 @@ impl KubeSyncer {
         match output {
             Ok(out) if out.status.success() => {
                 println!("✅ Synced {} -> {} (ctx: {})", src, target, kube_context);
+
+                // 🔁 Run post-sync command if provided
+                if let Some(cmd) = post_sync_command {
+                    println!("📟 Running post-sync command in pod: {} -> '{}'", pod, cmd);
+
+                    let exec_output = Command::new("kubectl")
+                        .arg("exec")
+                        .arg(pod)
+                        .arg("-n")
+                        .arg(namespace)
+                        .arg("--context")
+                        .arg(kube_context)
+                        .arg("--")
+                        .arg("sh")
+                        .arg("-c")
+                        .arg(cmd)
+                        .stdout(Stdio::piped())
+                        .stderr(Stdio::piped())
+                        .output()
+                        .await;
+
+                    match exec_output {
+                        Ok(exec_out) if exec_out.status.success() => {
+                            println!("✅ Post-sync command executed successfully in {}", pod);
+                        }
+                        Ok(exec_out) => {
+                            let err = String::from_utf8_lossy(&exec_out.stderr);
+                            eprintln!("❌ Post-sync command failed: {}", err);
+                        }
+                        Err(e) => {
+                            eprintln!("❌ Failed to run kubectl exec: {}", e);
+                        }
+                    }
+                }
             }
             Ok(out) => {
                 let err = String::from_utf8_lossy(&out.stderr);

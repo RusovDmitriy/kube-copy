@@ -16,6 +16,7 @@ pub struct WatcherConfig {
     pub namespace: String,
     pub label_selectors: Vec<String>,
     pub paths: Vec<PathConfig>,
+    pub post_sync_command: Option<String>,
 }
 
 pub fn load_configs<P: AsRef<Path>>(path: P) -> Result<Vec<WatcherConfig>> {

@@ -32,6 +32,7 @@ impl Controller {
                                     &pod_name,
                                     &path.src,
                                     &path.dest,
+                                    &conf.post_sync_command,
                                 )
                                 .await;
                         }
@@ -46,7 +47,14 @@ impl Controller {
         for config in configs {
             for path in &config.paths {
                 self.syncer
-                    .sync(&ctx, &ns, &pod_name, &path.src, &path.dest)
+                    .sync(
+                        &ctx,
+                        &ns,
+                        &pod_name,
+                        &path.src,
+                        &path.dest,
+                        &config.post_sync_command,
+                    )
                     .await;
             }
         }

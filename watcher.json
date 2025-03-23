@@ -9,6 +9,7 @@
         "src": "./my-app/dist",
         "dest": "/my-app/dist"
       }
-    ]
+    ],
+    "post_sync_command": "touch /app/.reload"
   }
 ]

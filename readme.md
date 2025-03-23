@@ -10,6 +10,7 @@
 - 🧠 Sync on pod restarts (via label selectors)
 - 📁 Sync only on changes, with debounce
 - ✅ Smart pod readiness check (all containers must be `Ready`)
+- 📟 Optional post-sync command (e.g. `touch` a file or trigger reload)
 - 📦 Simple JSON configuration
 - 🧪 Designed for rapid local dev with K8s
 
@@ -36,10 +37,19 @@ cp target/release/kube-copy /usr/local/bin
     "label_selectors": ["app=my-app"],
     "paths": [
       { "src": "./local/path", "dest": "/app/dest" }
-    ]
+    ],
+    "post_sync_command": "touch /app/.reload"
   }
 ]
 ```
+
+### 🔁 `post_sync_command` (optional)
+If provided, this shell command is executed **inside each pod** via `kubectl exec` after each successful sync.
+
+Use it to:
+- Trigger live-reload scripts
+- Touch a watched file (e.g. for `nodemon`)
+- Run arbitrary shell hooks in your container
 
 ---
 
@@ -64,6 +74,7 @@ kube-copy --config watcher.json
 - Uses `kube` + `kube-runtime` to track pod events
 - On trigger, uses `kubectl cp` to sync file/directory
 - Ensures pods are `Ready` before syncing
+- Optionally executes `post_sync_command` in pod via `kubectl exec`
 
 ---
 
